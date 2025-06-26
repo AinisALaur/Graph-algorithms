@@ -1,0 +1,40 @@
+#Main{
+    height: 650px;
+    width: 100%;
+    
+    position: absolute;
+    left: 50%;  
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+
+#Nodes{
+    height: 600px;
+    width: 800px;
+
+    border-style: solid;
+}
+
+#Options{
+    height: 600px;
+    width: 300px;
+
+    border-style: solid;
+}
+
+.Node{
+    height: 50px;
+    width: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: rgb(175, 167, 15);
+    border-radius: 50%;
+}
