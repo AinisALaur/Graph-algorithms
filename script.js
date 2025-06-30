@@ -1,6 +1,9 @@
 const nodes = [];
 let highlightedNodes = new Set();
 
+const canvasWidth = 1385;
+const canvasHeight = 400;
+
 function getMousePos(event) {
     let x = event.clientX;
     let y = event.clientY;
@@ -30,18 +33,18 @@ function getNodeId(x1, y1){
         let x2 = nodes[i][0];
         let y2 = nodes[i][1]; 
 
-        if(getDistance(x1,y1,x2,y2) < 40){
+        if(getDistance(x1,y1,x2,y2) < 50){
             return i;
         }
     }
 }
 
 function isInBounds(x, y){
-    var offsets = document.getElementById("Canvas").getBoundingClientRect();
+    var offsets = document.getElementById('Canvas').getBoundingClientRect();
     var top = offsets.top;
     var left = offsets.left;
 
-    if(x > left + 10 && x < left + 750 && y > top - 10 && y < top + 520){
+    if(x > left + 5 && x < left + canvasWidth - 54 && y > top - 15 && y < top + canvasHeight - 70){
         return true;
     }
     return false;
@@ -71,11 +74,11 @@ function deHighlightNode(id){
     highlightedNodes.delete(id);
 }
 
-function highlightNode(x, y){
+function highlightNode(x, y){   
     let id = getNodeId(x, y);
     if(highlightedNodes.has(id) == false){
         const node = document.getElementById(id);
-        node.style.border = "thick solid #f5e942";
+        node.style.border = "3px solid #ecc826";
         highlightedNodes.add(id);
     }else{
         deHighlightNode(id);
@@ -118,7 +121,9 @@ function connectNodes(){
 function getCoords(event){
     const coords = getMousePos(event);
     let x = coords[0] - 25;
-    let y = coords[1] - 25;
+    let y = coords[1] - 50;
+
+    console.log("Mouse clicked: ", x, y);
 
     if(isOverlaping(x,y) == false && isInBounds(x, y)){
         drawNewNode(x,y);
@@ -126,9 +131,11 @@ function getCoords(event){
     }
     
     else{
-        highlightNode(x,y);
-        if(highlightedNodes.size == 2){
-            connectNodes();
+        if(isInBounds(x, y)){
+            highlightNode(x,y);
+            if(highlightedNodes.size == 2){
+                connectNodes();
+            }
         }
     }
 }
