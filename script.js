@@ -1,7 +1,7 @@
-let nodes = [];
+let nodes = new Map();
 let highlightedNodes = new Set();
 const colorPicker = document.getElementById('colorPicker');
-let lines = 0;
+let neighbours = new Map();
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -19,9 +19,10 @@ function getDistance(x1, y1, x2, y2){
 }
 
 function isOverlaping(x1, y1){
-    for(let i = 0;  i < nodes.length; ++i){
-        let x2 = nodes[i][0];
-        let y2 = nodes[i][1]; 
+    for(let [key, value] of nodes){
+        let coordinates = value;
+        let x2 = coordinates[0];
+        let y2 = coordinates[1]; 
 
         if(getDistance(x1,y1,x2,y2) < 60){
             return true;
@@ -31,12 +32,13 @@ function isOverlaping(x1, y1){
 }
 
 function getNodeId(x1, y1){
-    for(let i = 0;  i < nodes.length; ++i){
-        let x2 = nodes[i][0];
-        let y2 = nodes[i][1]; 
+    for(let [key, value] of nodes){
+        let coordinates = value;
+        let x2 = coordinates[0];
+        let y2 = coordinates[1]; 
 
         if(getDistance(x1,y1,x2,y2) < 50){
-            return i;
+            return key;
         }
     }
 }
@@ -54,11 +56,12 @@ function isInBounds(x, y){
 
 function drawNewNode(x, y){
     const newNode = document.createElement("div");
-    const newContent = document.createTextNode((nodes.length + 1).toString());
+    const newContent = document.createTextNode((nodes.size).toString());
+    let newId = nodes.size - 1;
     newNode.appendChild(newContent);
 
     newNode.classList.add('Node');
-    newNode.id = (nodes.length).toString();
+    newNode.id = newId; 
 
     newNode.style.position = "absolute";
     newNode.style.left = x + 'px';
@@ -70,9 +73,7 @@ function drawNewNode(x, y){
 
     if(highlightedNodes.size == 1){
         const id = highlightedNodes.values().next().value;
-        let x1 = nodes[id][0];
-        let y1 = nodes[id][1];
-        connectNodes(x, y, x1, y1);
+        connectNodes(id, newId); 
     }
 }
 
@@ -94,27 +95,42 @@ function highlightNode(x, y){
 }
 
 function connectHighlighted(){
-    const coordinates = [];
+    const ids = [];
+
     for(const id of highlightedNodes){
-        let x = nodes[id][0];
-        let y = nodes[id][1];
-        coordinates.push([x,y]);
+        ids.push(id);
         deHighlightNode(id);
         highlightedNodes.delete(id);
     }
 
-    let x1 = coordinates[0][0];
-    let y1 = coordinates[0][1];
-    let x2 = coordinates[1][0];
-    let y2 = coordinates[1][1];
-
-    connectNodes(x1, y1, x2, y2);
+    connectNodes(ids[0], ids[1]);
 }
 
-function connectNodes(x1, y1, x2, y2){
+function connectNodes(id1, id2){
+    if(neighbours.has(id1) && neighbours.get(id1).includes(id2) || neighbours.has(id2) && neighbours.get(id1).includes(id2))
+        return;
+    
+    if (!neighbours.has(id1)) neighbours.set(id1, []);
+    if (!neighbours.has(id2)) neighbours.set(id2, []);
+
+    neighbours.get(id1).push(id2);
+    neighbours.get(id2).push(id1);
+
+    let coordinates1 = nodes.get(id1);
+    let coordinates2 = nodes.get(id2);
+
+    let x1 = coordinates1[0];
+    let y1 = coordinates1[1];
+    let x2 = coordinates2[0];
+    let y2 = coordinates2[1];
+
+    console.log(x1, y1, x2, y2);
+
     let length = getDistance(x1, y1, x2, y2);
     const newLine = document.createElement("div");
-    newLine.id = "Line" + (lines);
+    let minId = Math.min(id1, id2);
+    let maxId = Math.max(id1, id2);
+    newLine.id = `Line${minId}${maxId}`;
 
     newLine.style.width = length + "px";
     newLine.style.height = "2px";
@@ -150,7 +166,6 @@ function connectNodes(x1, y1, x2, y2){
 
     const parent = document.getElementById("Canvas");
     parent.appendChild(newLine);
-    ++lines;
 }
 
 function getCoords(event){
@@ -158,8 +173,8 @@ function getCoords(event){
     let x = coords[0] - 25;
     let y = coords[1] - 50;
     if(isOverlaping(x,y) == false && isInBounds(x, y)){
+        nodes.set(nodes.size, [x,y]);
         drawNewNode(x,y);
-        nodes.push([x,y]);
     }
     
     else{
@@ -173,22 +188,16 @@ function getCoords(event){
 }
 
 function clearNodes(){
-    if(nodes.length <= 0){
+    if(nodes.size <= 0){
         return;
     }
 
-    for(let i = 0; i < nodes.length; ++i){
-        const element = document.getElementById(i);
-        element.remove();
+    for (const [key, value] of nodes) {
+        deleteNode(key);
     }
 
-    for(let i = 0; i < lines; ++i){
-        const element = document.getElementById(`Line${i}`);
-        element.remove();
-    }
-    
-    nodes = [];
-    lines = 0;
+    nodes.clear();
+    neighbours.clear();
     highlightedNodes.clear();
 }
 
@@ -198,12 +207,41 @@ function openColorPicker(){
 
 function changeColors(event){
     let newColor = event.target.value;
-    for(let i = 0; i < nodes.length; ++i){
-        const element = document.getElementById(i);
+    for (const [key, value] of nodes) {
+        const element = document.getElementById(key);
         element.style.backgroundColor = newColor;
     }
     const button = document.getElementById("nodeColor");
     button.style.backgroundColor = newColor;
+}
+
+function deleteNode(id){
+    let element = document.getElementById(id);
+    element.remove();
+
+    if(neighbours.has(id) == false){
+        return;
+    }
+
+
+    for(let linesId of neighbours.get(id)){
+
+        let minId = Math.min(linesId, id);
+        let maxId = Math.max(linesId, id);
+
+        console.log(`Line${minId}${maxId}`);
+        element = document.getElementById(`Line${id}${linesId}`);
+        element.remove();
+
+        var index = neighbours.get(linesId).indexOf(id);
+        if (index !== -1) {
+            neighbours.get(linesId).splice(index, 1);
+        }
+        console.log(neighbours.get(linesId));
+    }   
+
+    nodes.delete(id);
+    neighbours.delete(id);
 }
 
 colorPicker.addEventListener("input", changeColors)
