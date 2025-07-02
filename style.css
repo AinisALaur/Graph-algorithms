@@ -39,7 +39,6 @@
     border: 3px solid transparent;
 
     border-radius: 50%;
-    background-color: rgb(49, 53, 190);
     box-shadow:  8px 8px 16px #bababa,
     -8px -8px 16px #ffffff;
 
@@ -87,16 +86,6 @@
     border-bottom: 3px black solid;
 }
 
-/* .Algorithms{
-    background: #833AB4;
-    background: linear-gradient(90deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%);
-}
-
-.Settings{
-    background: #833AB4;
-    background: linear-gradient(270deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%);
-} */
-
 #Buttons_1{
     height: 60%;
     width: 50%;
@@ -136,4 +125,9 @@
 .myButton:active {
 	position:relative;
 	top:1px;
+}
+
+#colorPicker {
+    opacity: 0;
+    position: absolute;
 }

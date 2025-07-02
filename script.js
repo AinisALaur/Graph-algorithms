@@ -1,5 +1,6 @@
 var nodes = [];
 let highlightedNodes = new Set();
+const colorPicker = document.getElementById('colorPicker');
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -61,6 +62,7 @@ function drawNewNode(x, y){
     newNode.style.position = "absolute";
     newNode.style.left = x + 'px';
     newNode.style.top = y + 'px';
+    newNode.style.backgroundColor = colorPicker.value;
 
     console.log("Node drawn ", x, y);
 
@@ -160,17 +162,33 @@ function getCoords(event){
 }
 
 function clearNodes(){
-    if(nodes.length > 0){
-        for(let i = 0; i < nodes.length; ++i){
-            const element = document.getElementById(i);
-            element.remove();
-        }
-        nodes = [];
+    if(nodes.length <= 0){
+        return;
+    }
 
-        const canvas = document.getElementById("myCanvas");
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for(let i = 0; i < nodes.length; ++i){
+        const element = document.getElementById(i);
+        element.remove();
+    }
+    
+    nodes = [];
+    highlightedNodes.clear();
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function openColorPicker(){
+    colorPicker.click();
+}
+
+function changeColors(event){
+    let newColor = event.target.value;
+    for(let i = 0; i < nodes.length; ++i){
+        const element = document.getElementById(i);
+        element.style.backgroundColor = newColor;
     }
 }
 
+colorPicker.addEventListener("input", changeColors)
 document.addEventListener("click", getCoords);
