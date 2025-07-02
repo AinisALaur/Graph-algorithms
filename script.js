@@ -66,6 +66,16 @@ function drawNewNode(x, y){
 
     const parent = document.getElementById("Canvas");
     parent.appendChild(newNode);
+
+    if(highlightedNodes.size == 1){
+        console.log("YES");
+        const id = highlightedNodes.values().next().value;
+        let x1 = nodes[id][0];
+        let y1 = nodes[id][1];
+        console.log(x, y, x1, y1);
+
+        connectNodes(x, y, x1, y1);
+    }
 }
 
 function deHighlightNode(id){
@@ -85,34 +95,46 @@ function highlightNode(x, y){
     }
 }
 
-function connectNodes(){
+function connectHighlighted(){
     const coordinates = [];
 
-    const canvasContainer = document.getElementById("Canvas");
-    const containerRect = canvasContainer.getBoundingClientRect();
-
+    // const canvasContainer = document.getElementById("Canvas");
+    // const containerRect = canvasContainer.getBoundingClientRect();
     for(const id of highlightedNodes){
-        let x = nodes[id][0] - containerRect.left + 25;
-        let y = nodes[id][1] - containerRect.top + 40;
+        let x = nodes[id][0];
+        let y = nodes[id][1];
         coordinates.push([x,y]);
         deHighlightNode(id);
         highlightedNodes.delete(id);
     }
 
+    let x1 = coordinates[0][0];
+    let y1 = coordinates[0][1];
+    let x2 = coordinates[1][0];
+    let y2 = coordinates[1][1];
+
+    connectNodes(x1, y1, x2, y2);
+}
+
+function connectNodes(x1 , y1, x2, y2){
     const c = document.getElementById("myCanvas");
     const ctx = c.getContext("2d");
 
-    X1 = coordinates[0][0];
-    Y1 = coordinates[0][1];
+    const canvasContainer = document.getElementById("Canvas");
+    const containerRect = canvasContainer.getBoundingClientRect();
 
-    X2 = coordinates[1][0];
-    Y2 = coordinates[1][1];
-
-    console.log(X1, Y1, X2, Y2);   
+    let offLeft = containerRect.left - 25;
+    let offTop = containerRect.top - 40;
     
+    x1 -= offLeft;
+    y1 -= offTop;
+
+    x2 -= offLeft;
+    y2 -= offTop;
+
     ctx.beginPath();
-    ctx.moveTo(X1, Y1);
-    ctx.lineTo(X2, Y2);
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 3;
     ctx.stroke();
@@ -134,7 +156,7 @@ function getCoords(event){
         if(isInBounds(x, y)){
             highlightNode(x,y);
             if(highlightedNodes.size == 2){
-                connectNodes();
+                connectHighlighted();
             }
         }
     }
