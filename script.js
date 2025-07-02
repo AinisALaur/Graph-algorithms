@@ -1,4 +1,4 @@
-const nodes = [];
+var nodes = [];
 let highlightedNodes = new Set();
 
 const canvasWidth = 1385;
@@ -97,9 +97,6 @@ function highlightNode(x, y){
 
 function connectHighlighted(){
     const coordinates = [];
-
-    // const canvasContainer = document.getElementById("Canvas");
-    // const containerRect = canvasContainer.getBoundingClientRect();
     for(const id of highlightedNodes){
         let x = nodes[id][0];
         let y = nodes[id][1];
@@ -159,6 +156,20 @@ function getCoords(event){
                 connectHighlighted();
             }
         }
+    }
+}
+
+function clearNodes(){
+    if(nodes.length > 0){
+        for(let i = 0; i < nodes.length; ++i){
+            const element = document.getElementById(i);
+            element.remove();
+        }
+        nodes = [];
+
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
 
