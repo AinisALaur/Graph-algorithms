@@ -1,6 +1,7 @@
-var nodes = [];
+let nodes = [];
 let highlightedNodes = new Set();
 const colorPicker = document.getElementById('colorPicker');
+let lines = 0;
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -64,18 +65,13 @@ function drawNewNode(x, y){
     newNode.style.top = y + 'px';
     newNode.style.backgroundColor = colorPicker.value;
 
-    console.log("Node drawn ", x, y);
-
     const parent = document.getElementById("Canvas");
     parent.appendChild(newNode);
 
     if(highlightedNodes.size == 1){
-        console.log("YES");
         const id = highlightedNodes.values().next().value;
         let x1 = nodes[id][0];
         let y1 = nodes[id][1];
-        console.log(x, y, x1, y1);
-
         connectNodes(x, y, x1, y1);
     }
 }
@@ -115,37 +111,52 @@ function connectHighlighted(){
     connectNodes(x1, y1, x2, y2);
 }
 
-function connectNodes(x1 , y1, x2, y2){
-    const c = document.getElementById("myCanvas");
-    const ctx = c.getContext("2d");
+function connectNodes(x1, y1, x2, y2){
+    let length = getDistance(x1, y1, x2, y2);
+    const newLine = document.createElement("div");
+    newLine.id = "Line" + (lines);
 
-    const canvasContainer = document.getElementById("Canvas");
-    const containerRect = canvasContainer.getBoundingClientRect();
+    newLine.style.width = length + "px";
+    newLine.style.height = "2px";
+    newLine.style.backgroundColor = "black";
+    newLine.style.zIndex = "-1";
 
-    let offLeft = containerRect.left - 25;
-    let offTop = containerRect.top - 40;
-    
-    x1 -= offLeft;
-    y1 -= offTop;
+    newLine.style.position = "absolute";
 
-    x2 -= offLeft;
-    y2 -= offTop;
+    if(x2 < x1){
+        let tempX = x2;
+        x2 = x1;
+        x1 = tempX;
 
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 3;
-    ctx.stroke();
+        let tempY = y2;
+        y2 = y1;
+        y1 = tempY;
+    }
+
+    let angle = Math.atan(Math.abs(y1 - y2) / Math.abs(x1 - x2));
+
+    if(y2 < y1){
+        angle *= -1;
+    }
+
+    var offsetLeft = 20;
+    var offsetTop = 20;
+
+    newLine.style.transform = 'rotate(' + angle + 'rad)';
+    newLine.style.transformOrigin = 'left top'; 
+
+    newLine.style.left = (x1 + offsetLeft) + 'px';
+    newLine.style.top = (y1 + offsetTop) + 'px';
+
+    const parent = document.getElementById("Canvas");
+    parent.appendChild(newLine);
+    ++lines;
 }
 
 function getCoords(event){
     const coords = getMousePos(event);
     let x = coords[0] - 25;
     let y = coords[1] - 50;
-
-    console.log("Mouse clicked: ", x, y);
-
     if(isOverlaping(x,y) == false && isInBounds(x, y)){
         drawNewNode(x,y);
         nodes.push([x,y]);
@@ -170,12 +181,15 @@ function clearNodes(){
         const element = document.getElementById(i);
         element.remove();
     }
+
+    for(let i = 0; i < lines; ++i){
+        const element = document.getElementById(`Line${i}`);
+        element.remove();
+    }
     
     nodes = [];
+    lines = 0;
     highlightedNodes.clear();
-    const canvas = document.getElementById("myCanvas");
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function openColorPicker(){
@@ -188,6 +202,8 @@ function changeColors(event){
         const element = document.getElementById(i);
         element.style.backgroundColor = newColor;
     }
+    const button = document.getElementById("nodeColor");
+    button.style.backgroundColor = newColor;
 }
 
 colorPicker.addEventListener("input", changeColors)
