@@ -117,7 +117,7 @@ function connectHighlighted(){
 }
 
 function connectNodes(id1, id2){
-    if(neighbours.has(id1) && neighbours.get(id1).includes(id2) || neighbours.has(id2) && neighbours.get(id1).includes(id2))
+    if(neighbours.has(id1) && neighbours.get(id1).includes(id2))
         return;
     
     if (!neighbours.has(id1)) neighbours.set(id1, []);
@@ -253,15 +253,15 @@ function deleteNode(id){
 
 function deleteClicked(){
     const button = document.getElementById("deleteButton");
+    const allNodes = document.querySelectorAll('.Node');
 
-    let color = "#de1f38";
+    deleteIsClicked = !deleteIsClicked;
 
-    if(deleteIsClicked){
-        color = "#768d87";
-        deleteIsClicked = false;
-    }else{
-        deleteIsClicked = true;
-    }
+    let color = deleteIsClicked ? "#de1f38" : "#768d87";
+
+    allNodes.forEach(node => {
+        node.classList.toggle('delete-hover', deleteIsClicked);
+    });
 
     button.style.backgroundColor = color;
 }

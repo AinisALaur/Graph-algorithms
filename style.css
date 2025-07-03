@@ -31,6 +31,7 @@
     width: 50px;
 
     color: white;
+    background-color: #3136bf;
 
     display: flex;
     align-items: center;
@@ -48,7 +49,7 @@
 }
 
 .Node:hover{
-    border: 3px solid #ecc826;
+    border: 3px solid #ecc826 !important;
 }
 
 #Options{
@@ -132,8 +133,26 @@
     position: absolute;
 }
 
-/* .Line{
-    height: 2px;
-    background-color: black;
+.Node.delete-hover:hover {
+    border: 3px solid red !important;
+}
+
+.Node.delete-hover:hover::before,
+.Node.delete-hover:hover::after {
+    content: '';
     position: absolute;
-} */
+    top: 10;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: red;
+    transform-origin: center;
+}
+
+.Node.delete-hover:hover::before {
+    transform: rotate(45deg);
+}
+
+.Node.delete-hover:hover::after {
+    transform: rotate(-45deg);
+}
