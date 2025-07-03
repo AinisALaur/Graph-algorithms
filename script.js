@@ -223,21 +223,19 @@ function deleteNode(id){
         return;
     }
 
-
     for(let linesId of neighbours.get(id)){
 
         let minId = Math.min(linesId, id);
         let maxId = Math.max(linesId, id);
 
         console.log(`Line${minId}${maxId}`);
-        element = document.getElementById(`Line${id}${linesId}`);
+        element = document.getElementById(`Line${minId}${maxId}`);
         element.remove();
 
         var index = neighbours.get(linesId).indexOf(id);
         if (index !== -1) {
             neighbours.get(linesId).splice(index, 1);
         }
-        console.log(neighbours.get(linesId));
     }   
 
     nodes.delete(id);
