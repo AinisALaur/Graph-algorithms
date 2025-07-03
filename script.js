@@ -2,6 +2,8 @@ let nodes = new Map();
 let highlightedNodes = new Set();
 const colorPicker = document.getElementById('colorPicker');
 let neighbours = new Map();
+let deleteIsClicked = false;
+let nodeId = 0;
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -56,8 +58,9 @@ function isInBounds(x, y){
 
 function drawNewNode(x, y){
     const newNode = document.createElement("div");
-    const newContent = document.createTextNode((nodes.size).toString());
-    let newId = nodes.size - 1;
+    const newContent = document.createTextNode(nodeId + 1);
+    let newId = nodeId;
+    ++nodeId;
     newNode.appendChild(newContent);
 
     newNode.classList.add('Node');
@@ -85,10 +88,17 @@ function deHighlightNode(id){
 
 function highlightNode(x, y){   
     let id = getNodeId(x, y);
+    if (typeof id === 'undefined')
+        return ;
+
     if(highlightedNodes.has(id) == false){
-        const node = document.getElementById(id);
-        node.style.border = "3px solid #ecc826";
-        highlightedNodes.add(id);
+        if(deleteIsClicked){
+            deleteNode(id);
+        }else{
+            const node = document.getElementById(id);
+            node.style.border = "3px solid #ecc826";
+            highlightedNodes.add(id);
+        }
     }else{
         deHighlightNode(id);
     }
@@ -123,8 +133,6 @@ function connectNodes(id1, id2){
     let y1 = coordinates1[1];
     let x2 = coordinates2[0];
     let y2 = coordinates2[1];
-
-    console.log(x1, y1, x2, y2);
 
     let length = getDistance(x1, y1, x2, y2);
     const newLine = document.createElement("div");
@@ -172,8 +180,8 @@ function getCoords(event){
     const coords = getMousePos(event);
     let x = coords[0] - 25;
     let y = coords[1] - 50;
-    if(isOverlaping(x,y) == false && isInBounds(x, y)){
-        nodes.set(nodes.size, [x,y]);
+    if(isOverlaping(x,y) == false && isInBounds(x, y) && !deleteIsClicked){
+        nodes.set(nodeId, [x,y]);
         drawNewNode(x,y);
     }
     
@@ -195,7 +203,8 @@ function clearNodes(){
     for (const [key, value] of nodes) {
         deleteNode(key);
     }
-
+    
+    nodeId = 0;
     nodes.clear();
     neighbours.clear();
     highlightedNodes.clear();
@@ -219,6 +228,8 @@ function deleteNode(id){
     let element = document.getElementById(id);
     element.remove();
 
+    nodes.delete(id);
+
     if(neighbours.has(id) == false){
         return;
     }
@@ -228,7 +239,6 @@ function deleteNode(id){
         let minId = Math.min(linesId, id);
         let maxId = Math.max(linesId, id);
 
-        console.log(`Line${minId}${maxId}`);
         element = document.getElementById(`Line${minId}${maxId}`);
         element.remove();
 
@@ -238,8 +248,22 @@ function deleteNode(id){
         }
     }   
 
-    nodes.delete(id);
     neighbours.delete(id);
+}
+
+function deleteClicked(){
+    const button = document.getElementById("deleteButton");
+
+    let color = "#de1f38";
+
+    if(deleteIsClicked){
+        color = "#768d87";
+        deleteIsClicked = false;
+    }else{
+        deleteIsClicked = true;
+    }
+
+    button.style.backgroundColor = color;
 }
 
 colorPicker.addEventListener("input", changeColors)
