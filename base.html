@@ -26,10 +26,10 @@
                 <div id = "Tittle" class = "Settings" >Settings</div>
                 <div id = "Buttons_1">
                     <a href="#" class="myButton" onclick="clearNodes()">Clear canvas</a>
-                    <a href="#" class="myButton">Import from matrix</a>
+                    <a href="#" class="myButton" id = "adjButton" onclick="getAdj()">Export adj. matrix</a>
                 </div>
                 <div id = "Buttons_2">
-                    <a href="#" class="myButton">Delete node</a>
+                    <a href="#" id = "deleteButton" class="myButton" onclick="deleteClicked()">Delete node</a>
 
                     <a href="#" class="myButton" onclick = "openColorPicker()" id="nodeColor" style="background-color: #3136bf;">Node
                         <input type="color" value="#3136bf" id="colorPicker">
@@ -41,6 +41,9 @@
         </div>
         
         <div id = "Canvas">
+        </div>
+
+        <div id = "Matrix">
         </div>
     </div>
     

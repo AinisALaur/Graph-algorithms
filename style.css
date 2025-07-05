@@ -156,3 +156,13 @@
 .Node.delete-hover:hover::after {
     transform: rotate(-45deg);
 }
+
+#Matrix{
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    border: 4px black solid;
+    background-color: white;
+    display: none;
+    white-space: pre-wrap;
+}

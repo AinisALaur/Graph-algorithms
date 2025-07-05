@@ -4,6 +4,7 @@ const colorPicker = document.getElementById('colorPicker');
 let neighbours = new Map();
 let deleteIsClicked = false;
 let nodeId = 0;
+let matrixIsDisplayed = false;
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -196,6 +197,7 @@ function getCoords(event){
 }
 
 function clearNodes(){
+    nodeId = 0;
     if(nodes.size <= 0){
         return;
     }
@@ -204,10 +206,13 @@ function clearNodes(){
         deleteNode(key);
     }
     
-    nodeId = 0;
     nodes.clear();
     neighbours.clear();
     highlightedNodes.clear();
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
 }
 
 function openColorPicker(){
@@ -252,6 +257,10 @@ function deleteNode(id){
 }
 
 function deleteClicked(){
+    for(let id of highlightedNodes){
+        deHighlightNode(id);
+    }
+
     const button = document.getElementById("deleteButton");
     const allNodes = document.querySelectorAll('.Node');
 
@@ -264,6 +273,64 @@ function deleteClicked(){
     });
 
     button.style.backgroundColor = color;
+}
+
+function constructMatrix(){
+    let size = nodes.size;
+    let matrix = new Array(size);   
+    for (let i = 0; i < size; i++) {
+        matrix[i] = new Array(size).fill(0);
+    }
+
+    const nodeIds = new Map();
+    let i = 0;
+    for(let [key, value] of neighbours){
+        nodeIds.set(key, i);
+        ++i;
+    }
+
+    i = 0;
+    for(let [key, value] of neighbours){
+        for(let x of value){
+            let pos = nodeIds.get(x);
+            // console.log(i, pos);
+            matrix[i][pos] = 1;
+        }
+        ++i;
+    }
+
+    return matrix;
+}
+
+function getAdj(){
+    const matrix = document.getElementById('Matrix');
+    const adjButtonOffsets = document.getElementById('adjButton').getBoundingClientRect();;
+
+    let top = adjButtonOffsets.top + 20;
+    let left = adjButtonOffsets.left + 20;
+
+    if(!matrixIsDisplayed){
+        matrix.style.display = "block";
+
+        matrix.style.top = top + 'px';
+        matrix.style.left = left + 'px';
+
+        let adjMatrix = constructMatrix();
+        let content = "";
+
+        for(let row of adjMatrix){
+            for(let element of row){
+                content += element + ', ';
+            }
+            content += '<br>';
+        }
+        matrix.innerHTML = content;
+
+    }else{
+        matrix.style.display = "none";
+    }
+
+    matrixIsDisplayed = !matrixIsDisplayed;
 }
 
 colorPicker.addEventListener("input", changeColors)
