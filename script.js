@@ -181,6 +181,13 @@ function getCoords(event){
     const coords = getMousePos(event);
     let x = coords[0] - 25;
     let y = coords[1] - 50;
+
+    if(matrixIsDisplayed){
+        if(isInBounds(x, y)){
+            getAdj();
+        }
+        return;
+    }
     if(isOverlaping(x,y) == false && isInBounds(x, y) && !deleteIsClicked){
         nodes.set(nodeId, [x,y]);
         drawNewNode(x,y);
@@ -197,6 +204,14 @@ function getCoords(event){
 }
 
 function clearNodes(){
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
     nodeId = 0;
     if(nodes.size <= 0){
         return;
@@ -209,14 +224,18 @@ function clearNodes(){
     nodes.clear();
     neighbours.clear();
     highlightedNodes.clear();
-
-    if(deleteIsClicked){
-        deleteClicked();
-    }
 }
 
 function openColorPicker(){
     colorPicker.click();
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
+    if(matrixIsDisplayed){
+        getAdj();
+    }
 }
 
 function changeColors(event){
@@ -261,6 +280,10 @@ function deleteClicked(){
         deHighlightNode(id);
     }
 
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
     const button = document.getElementById("deleteButton");
     const allNodes = document.querySelectorAll('.Node');
 
@@ -276,6 +299,10 @@ function deleteClicked(){
 }
 
 function constructMatrix(){
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
     let size = nodes.size;
     let matrix = new Array(size);   
     for (let i = 0; i < size; i++) {
@@ -284,16 +311,21 @@ function constructMatrix(){
 
     const nodeIds = new Map();
     let i = 0;
-    for(let [key, value] of neighbours){
+    for(let [key, value] of nodes){
+        console.log(key, i);
         nodeIds.set(key, i);
         ++i;
     }
 
     i = 0;
-    for(let [key, value] of neighbours){
-        for(let x of value){
+    for(let [key, value] of nodeIds){
+        if(!neighbours.has(key)){
+            ++i;
+            continue;
+        }
+
+        for(let x of neighbours.get(key)){
             let pos = nodeIds.get(x);
-            // console.log(i, pos);
             matrix[i][pos] = 1;
         }
         ++i;
