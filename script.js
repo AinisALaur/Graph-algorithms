@@ -6,7 +6,9 @@ let deleteIsClicked = false;
 let nodeId = 0;
 let matrixIsDisplayed = false;
 let shortestPathButtonClicked = false;
+let hamiltonianCycleButtonClicked = false;
 let highlightedLines = new Set();
+let justClickedHamiltonian = false;
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -96,7 +98,7 @@ function highlightNode(x, y){
 
     let borderColor = "#ecc826";
 
-    if(shortestPathButtonClicked){
+    if(shortestPathButtonClicked || justClickedHamiltonian){
         borderColor = "#5fcf53";
     }
 
@@ -191,13 +193,16 @@ function connectNodes(id1, id2){
 }
 
 function getCoords(event){
-
-    if(highlightedLines.size > 0){
+    if(highlightedLines.size > 0 && justClickedHamiltonian == false){
         deHighlightLines();
         for(let id of highlightedNodes){
             deHighlightNode(id);
         }
         return;
+    }
+
+    if(justClickedHamiltonian){
+        justClickedHamiltonian = !justClickedHamiltonian;
     }
 
     const coords = getMousePos(event);
@@ -246,6 +251,7 @@ function clearNodes(){
     nodes.clear();
     neighbours.clear();
     highlightedNodes.clear();
+    highlightedLines.clear();
 }
 
 function openColorPicker(){
@@ -343,7 +349,6 @@ function constructMatrix(){
     const nodeIds = new Map();
     let i = 0;
     for(let [key, value] of nodes){
-        console.log(key, i);
         nodeIds.set(key, i);
         ++i;
     }
@@ -402,8 +407,10 @@ function getAdj(){
 
 function highlightLine(id){
     let line = document.getElementById(id);
-    line.style.backgroundColor = "#5fcf53";
-    highlightedLines.add(id);
+    if(line){
+        line.style.backgroundColor = "#5fcf53";
+        highlightedLines.add(id);
+    }
 }
 
 function deHighlightLines(){
@@ -414,7 +421,7 @@ function deHighlightLines(){
     highlightedLines.clear();
 }
 
-function reconstruct_path(start, goal, path){
+function reconstructPath(start, goal, path){
     let current = goal;
     while(current != start){
         let coords = nodes.get(current);
@@ -458,9 +465,13 @@ function aStar(start, goal){
         let last = openSet.length - 1;
         current = openSet[last];  
         if (current == goal)
-            return reconstruct_path(start, goal, path);
+            return reconstructPath(start, goal, path);
 
         openSet.splice(last, 1);    
+
+        if(!neighbours.has(current)){
+            continue;
+        }
 
         for(let neighbour of neighbours.get(current)){
             let tentative_gScore = gScore[current] + 1;
@@ -479,9 +490,71 @@ function aStar(start, goal){
     return -1;
 }
 
+function highlightNodesAndLines(path){
+    highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
+    for(let i = 1; i < path.length; ++i){
+        let coords = nodes.get(path[i]);
+        highlightNode(coords[0], coords[1]);
+
+        let min = Math.min(path[i], path[i - 1]);
+        let max = Math.max(path[i], path[i - 1]);
+        highlightLine(`Line${min}${max}`);
+    }
+    highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
+}
+
+function hamiltonianCycleHelper(){
+    if(nodes.size == 0)
+        return;
+
+    let maxId = Math.max(...nodes.keys()) + 1;
+    let path = new Array();
+    
+    let visited = new Array(maxId);
+    visited.fill(false);
+
+    let start = maxId - 1;
+    visited[start] = true;
+    path.push(start);
+
+    let isCycle = hamiltonianCycle(start, start, path, visited);
+
+    if(isCycle){
+        path.push(path[0]);
+        highlightNodesAndLines(path);
+    }
+}
+
+function hamiltonianCycle(start, current, path, visited){
+    if(path.length == nodes.size){
+        return neighbours.get(current)?.includes(start);
+    }
+
+    if(!neighbours.has(current)){
+        return false;
+    }
+
+    for(let neighbour of neighbours.get(current)){
+        if(visited[neighbour] == false){
+            visited[neighbour] = true;
+            path.push(neighbour);
+
+            if(hamiltonianCycle(start, neighbour, path, visited)){
+                return true;
+            }
+
+            visited[neighbour] = false;
+            const index = path.indexOf(neighbour);
+            path.splice(index, 1);
+        }
+    }
+
+    return false;
+}
+
 function getShortestPath(){
     let button = document.getElementById("ShortestPathButton");
-    var color = "#768d87";
+    let color = "#768d87";
 
     if(!shortestPathButtonClicked){
         color = "#5fcf53";
@@ -489,6 +562,13 @@ function getShortestPath(){
 
     button.style.backgroundColor = color;
     shortestPathButtonClicked = !shortestPathButtonClicked;
+}
+
+function getHamiltonianCycle(){
+    if(!justClickedHamiltonian && highlightedLines.size == 0){
+        justClickedHamiltonian = true;
+        hamiltonianCycleHelper();
+    }
 }
 
 
