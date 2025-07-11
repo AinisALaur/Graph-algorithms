@@ -5,6 +5,8 @@ let neighbours = new Map();
 let deleteIsClicked = false;
 let nodeId = 0;
 let matrixIsDisplayed = false;
+let shortestPathButtonClicked = false;
+let highlightedLines = new Set();
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -92,12 +94,18 @@ function highlightNode(x, y){
     if (typeof id === 'undefined')
         return ;
 
+    let borderColor = "#ecc826";
+
+    if(shortestPathButtonClicked){
+        borderColor = "#5fcf53";
+    }
+
     if(highlightedNodes.has(id) == false){
         if(deleteIsClicked){
             deleteNode(id);
         }else{
             const node = document.getElementById(id);
-            node.style.border = "3px solid #ecc826";
+            node.style.border = `3px solid ${borderColor}`;
             highlightedNodes.add(id);
         }
     }else{
@@ -114,7 +122,12 @@ function connectHighlighted(){
         highlightedNodes.delete(id);
     }
 
-    connectNodes(ids[0], ids[1]);
+    if(shortestPathButtonClicked){
+        aStar(ids[0], ids[1]);
+        getShortestPath();
+    }else{
+        connectNodes(ids[0], ids[1]);   
+    }
 }
 
 function connectNodes(id1, id2){
@@ -178,6 +191,15 @@ function connectNodes(id1, id2){
 }
 
 function getCoords(event){
+
+    if(highlightedLines.size > 0){
+        deHighlightLines();
+        for(let id of highlightedNodes){
+            deHighlightNode(id);
+        }
+        return;
+    }
+
     const coords = getMousePos(event);
     let x = coords[0] - 25;
     let y = coords[1] - 50;
@@ -236,6 +258,10 @@ function openColorPicker(){
     if(matrixIsDisplayed){
         getAdj();
     }
+
+    if(highlightedLines.size > 0){
+        deHighlightLines();
+    }
 }
 
 function changeColors(event){
@@ -276,12 +302,17 @@ function deleteNode(id){
 }
 
 function deleteClicked(){
+
     for(let id of highlightedNodes){
         deHighlightNode(id);
     }
 
     if(matrixIsDisplayed){
         getAdj();
+    }
+
+    if(highlightedLines.size > 0){
+        deHighlightLines();
     }
 
     const button = document.getElementById("deleteButton");
@@ -341,6 +372,10 @@ function getAdj(){
     let top = adjButtonOffsets.top + 20;
     let left = adjButtonOffsets.left + 20;
 
+    if(highlightedLines.size > 0){
+        deHighlightLines();
+    }
+
     if(!matrixIsDisplayed){
         matrix.style.display = "block";
 
@@ -365,13 +400,31 @@ function getAdj(){
     matrixIsDisplayed = !matrixIsDisplayed;
 }
 
-function reconstruct_path(start, goal, path){   
+function highlightLine(id){
+    let line = document.getElementById(id);
+    line.style.backgroundColor = "#5fcf53";
+    highlightedLines.add(id);
+}
+
+function deHighlightLines(){
+    for(let id of highlightedLines){
+        let line = document.getElementById(id);
+        line.style.backgroundColor = "black";
+    }
+    highlightedLines.clear();
+}
+
+function reconstruct_path(start, goal, path){
     let current = goal;
     while(current != start){
-        console.log(current);
+        let coords = nodes.get(current);
+        highlightNode(coords[0], coords[1]);
+        let min = Math.min(current, path[current]);
+        let max = Math.max(current, path[current]);
+        highlightLine(`Line${min}${max}`);
         current = path[current];
     }
-    console.log(start);
+    highlightNode(nodes.get(start)[0], nodes.get(start)[1]);
 }
 
 function heuristic(node1, node2){
@@ -424,6 +477,18 @@ function aStar(start, goal){
     }   
 
     return -1;
+}
+
+function getShortestPath(){
+    let button = document.getElementById("ShortestPathButton");
+    var color = "#768d87";
+
+    if(!shortestPathButtonClicked){
+        color = "#5fcf53";
+    }
+
+    button.style.backgroundColor = color;
+    shortestPathButtonClicked = !shortestPathButtonClicked;
 }
 
 
