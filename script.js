@@ -381,19 +381,19 @@ function heuristic(node1, node2){
 }  
 
 function aStar(start, goal){
-    let size = nodes.size;
+    let maxId = Math.max(...nodes.keys()) + 1;
 
     openSet = new Array();
     openSet.push(start);
 
-    path = new Array(size);
+    path = new Array(maxId);
     path[start] = -1;
 
-    gScore = new Array(size);
+    gScore = new Array(maxId);
     gScore.fill(Number.MAX_SAFE_INTEGER);
     gScore[start] = 0;
     
-    fScore = new Array(size);
+    fScore = new Array(maxId);
     fScore.fill(Number.MAX_SAFE_INTEGER);
     fScore[start] = heuristic(start, goal);
 
@@ -419,10 +419,9 @@ function aStar(start, goal){
                 if(openSet.includes(neighbour) == false){
                     openSet.push(neighbour);
                 }
-
             }
         }
-    }
+    }   
 
     return -1;
 }
