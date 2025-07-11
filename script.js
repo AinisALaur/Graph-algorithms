@@ -8,7 +8,8 @@ let matrixIsDisplayed = false;
 let shortestPathButtonClicked = false;
 let hamiltonianCycleButtonClicked = false;
 let highlightedLines = new Set();
-let justClickedHamiltonian = false;
+let justClicked = false;
+let nodesAreColored = false;
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -98,7 +99,7 @@ function highlightNode(x, y){
 
     let borderColor = "#ecc826";
 
-    if(shortestPathButtonClicked || justClickedHamiltonian){
+    if(shortestPathButtonClicked || justClicked){
         borderColor = "#5fcf53";
     }
 
@@ -192,17 +193,20 @@ function connectNodes(id1, id2){
     parent.appendChild(newLine);
 }
 
+//highlight node if its clicked on it when trying to remove algorithm effect
 function getCoords(event){
-    if(highlightedLines.size > 0 && justClickedHamiltonian == false){
+    if(highlightedLines.size > 0 && justClicked == false || nodesAreColored && justClicked == false){
+        changeColors();
         deHighlightLines();
         for(let id of highlightedNodes){
             deHighlightNode(id);
         }
+        nodesAreColored = false;
         return;
     }
 
-    if(justClickedHamiltonian){
-        justClickedHamiltonian = !justClickedHamiltonian;
+    if(justClicked){
+        justClicked = !justClicked;
     }
 
     const coords = getMousePos(event);
@@ -270,8 +274,8 @@ function openColorPicker(){
     }
 }
 
-function changeColors(event){
-    let newColor = event.target.value;
+function changeColors(){
+    let newColor = colorPicker.value;
     for (const [key, value] of nodes) {
         const element = document.getElementById(key);
         element.style.backgroundColor = newColor;
@@ -526,6 +530,10 @@ function hamiltonianCycleHelper(){
 }
 
 function hamiltonianCycle(start, current, path, visited){
+    if(nodes.size < 3){
+        return false;
+    }
+    
     if(path.length == nodes.size){
         return neighbours.get(current)?.includes(start);
     }
@@ -565,12 +573,80 @@ function getShortestPath(){
 }
 
 function getHamiltonianCycle(){
-    if(!justClickedHamiltonian && highlightedLines.size == 0){
-        justClickedHamiltonian = true;
+    if(!justClicked && highlightedLines.size == 0){
+        justClicked = true;
         hamiltonianCycleHelper();
     }
 }
 
+function generateRandomColor(){
+    let maxVal = 0xFFFFFF;
+    let randomNumber = Math.random() * maxVal; 
+    randomNumber = Math.floor(randomNumber);
+    randomNumber = randomNumber.toString(16);
+    let randColor = randomNumber.padStart(6, 0);   
+    return `#${randColor.toUpperCase()}`
+}
+
+function vertexColoring(){
+    let maxId = Math.max(...nodes.keys()) + 1;
+    let result = new Array(maxId);
+    result.fill(-1);
+    result[0] = 0;
+
+    let numOfColors = 0;
+
+    let available = new Array(maxId);
+    available.fill(false);
+
+    for(let i = 1; i < maxId; ++i){
+        if(neighbours.has(i)){
+            for(let neighbour of neighbours.get(i)){
+                if(result[neighbour] != -1){
+                    available[result[neighbour]] = true;
+                }
+            }
+
+            let cr;
+            for(cr = 0; cr < maxId - 1; ++cr){
+                if(available[cr] == false){
+                    numOfColors = Math.max(numOfColors, cr);
+                    break;
+                }
+            }
+            
+            result[i] = cr;
+
+            for(let neighbour of neighbours.get(i)){
+                if(result[neighbour] != -1){
+                    available[result[neighbour]] = false;
+                }
+            }
+        }else if(nodes.has(i)){
+            result[i] = 0;
+        }
+    }
+
+    let colors = new Map();
+    for(let i = 0; i < numOfColors + 1; ++i){
+        colors.set(i, generateRandomColor());
+    }
+
+    for(let i = 0; i < maxId; ++i){
+        if(nodes.has(i)){
+            let node = document.getElementById(i);
+            node.style.backgroundColor = colors.get(result[i]);
+        }
+    }
+}
+
+function getVertexColoring(){
+    if(!nodesAreColored){
+        nodesAreColored = true;
+        justClicked = true;
+        vertexColoring();
+    }
+}
 
 colorPicker.addEventListener("input", changeColors)
 document.addEventListener("click", getCoords);
