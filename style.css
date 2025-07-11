@@ -165,4 +165,7 @@
     background-color: white;
     display: none;
     white-space: pre-wrap;
+    overflow: scroll;
+    overflow: auto;
+    white-space: nowrap;
 }
