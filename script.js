@@ -365,5 +365,68 @@ function getAdj(){
     matrixIsDisplayed = !matrixIsDisplayed;
 }
 
+function reconstruct_path(start, goal, path){   
+    let current = goal;
+    while(current != start){
+        console.log(current);
+        current = path[current];
+    }
+    console.log(start);
+}
+
+function heuristic(node1, node2){
+    let coords1 = nodes.get(node1);
+    let coords2 = nodes.get(node2);
+    return getDistance(coords1[0], coords1[1], coords2[0], coords2[1]);
+}  
+
+function aStar(start, goal){
+    let size = nodes.size;
+
+    openSet = new Array();
+    openSet.push(start);
+
+    path = new Array(size);
+    path[start] = -1;
+
+    gScore = new Array(size);
+    gScore.fill(Number.MAX_SAFE_INTEGER);
+    gScore[start] = 0;
+    
+    fScore = new Array(size);
+    fScore.fill(Number.MAX_SAFE_INTEGER);
+    fScore[start] = heuristic(start, goal);
+
+    while(openSet.length != 0){
+        openSet.sort(function(a, b){
+            return fScore[a] > fScore[b];
+        });
+
+        let last = openSet.length - 1;
+        current = openSet[last];  
+        if (current == goal)
+            return reconstruct_path(start, goal, path);
+
+        openSet.splice(last, 1);    
+
+        for(let neighbour of neighbours.get(current)){
+            let tentative_gScore = gScore[current] + 1;
+            if(tentative_gScore < gScore[neighbour]){
+                path[neighbour] = current;
+                gScore[neighbour] = tentative_gScore;
+                fScore[neighbour] = tentative_gScore + heuristic(neighbour, goal);
+
+                if(openSet.includes(neighbour) == false){
+                    openSet.push(neighbour);
+                }
+
+            }
+        }
+    }
+
+    return -1;
+}
+
+
 colorPicker.addEventListener("input", changeColors)
 document.addEventListener("click", getCoords);
