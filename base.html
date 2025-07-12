@@ -14,27 +14,25 @@
             <div id = "Algorithms">
                 <div id = "Tittle" class = "Algorithms">Algorithms</div>
                 <div id = "Buttons_1">
-                    <a href="#" id = "ShortestPathButton" class="myButton" onclick="shortestPathPressed()">Shortest path - A*</a>
-                    <a href="#" class="myButton"  onclick="getHamiltonianCycle()">Hamiltonian cycle</a>
+                    <button class="button-30" role="button" id = "ShortestPathButton" onclick="shortestPathPressed()">Shortest path - A*</button>
+                    <button class="button-30" role="button" onclick="getHamiltonianCycle()">Hamiltonian cycle</button>
                 </div>
                 <div id = "Buttons_2">
-                    <a href="#" class="myButton" onclick="getVertexColoring()">Vertex coloring</a>
-                    <a href="#" class="myButton" onclick="getLongestPath()">Longest path</a>
+                    <button class="button-30" role="button" onclick="getVertexColoring()">Vertex coloring</button>
+                    <button class="button-30" role="button" onclick="getLongestPath()">Longest path</button>
                 </div>  
             </div>
             <div id = "Settings">
                 <div id = "Tittle" class = "Settings" >Settings</div>
                 <div id = "Buttons_1">
-                    <a href="#" class="myButton" onclick="clearNodes()">Clear canvas</a>
-                    <a href="#" class="myButton" id = "adjButton" onclick="getAdj()">Export adj. matrix</a>
+                    <button class="button-30" role="button" onclick="clearNodes()">Clear canvas</button>
+                    <button class="button-30" role="button" id = "adjButton" onclick="getAdj()">Export adj. matrix</button>
                 </div>
                 <div id = "Buttons_2">
-                    <a href="#" id = "deleteButton" class="myButton" onclick="deleteClicked()">Delete node</a>
-
-                    <a href="#" class="myButton" onclick = "openColorPicker()" id="nodeColor" style="background-color: #3136bf;">Node
+                    <button id = "deleteButton" class="button-30" role="button" onclick="deleteClicked()">Delete node</button>
+                    <button class="button-30" role="button" onclick = "openColorPicker()" id="nodeColor" style="background-color: #3136bf; color: #FCFCFD">Node 
                         <input type="color" value="#3136bf" id="colorPicker">
-                        color
-                    </a>
+                    color</button>
 
                 </div>
             </div>

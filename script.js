@@ -17,10 +17,11 @@ let justClicked = false;
 //Global variables for colors
 let highlightedBorderColor = "#ecc826";
 let highlightedAlgColor = "#5fcf53";
-let defaultButtonColor = "#768d87";
+let defaultButtonColor = "#FCFCFD";
 let deleteButtonColor = "#de1f38";
 let shortestPathButtonColor = "#5fcf53";
 let defaultLineColor = "black";
+let defaultTextColor = "#36395A";
 
 
 //Everything with coordinates
@@ -651,12 +652,14 @@ function deleteClicked(){
     deleteIsClicked = !deleteIsClicked;
 
     let color = deleteIsClicked ? deleteButtonColor : defaultButtonColor;
+    let textColor = deleteIsClicked? defaultButtonColor: defaultTextColor;
 
     allNodes.forEach(node => {
         node.classList.toggle('delete-hover', deleteIsClicked);
     });
 
     button.style.backgroundColor = color;
+    button.style.color = textColor;
 }
 
 function openColorPicker(){
@@ -680,12 +683,15 @@ function shortestPathPressed(){
     if (typeof button === 'undefined')
         return ;
     let color = defaultButtonColor;
+    let textColor = defaultTextColor;
 
     if(!shortestPathButtonClicked){
         color = shortestPathButtonColor;
+        textColor = defaultButtonColor;
     }
 
     button.style.backgroundColor = color;
+    button.style.color = textColor;
     shortestPathButtonClicked = !shortestPathButtonClicked;
 }
 
