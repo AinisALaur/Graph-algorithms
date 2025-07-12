@@ -3,6 +3,7 @@ let nodes = new Map();
 let highlightedNodes = new Set();
 let neighbours = new Map();
 let nodeId = 0;
+let effectsRemoved = true;
 
 //Global variables for algorithms and settings
 let matrixIsDisplayed = false;
@@ -76,12 +77,14 @@ function isInBounds(x, y){
     return false;
 }
 
-function useCoords(event){
+function useCoords(event){    
     if(matrixIsDisplayed){
+        getAdj();
         return;
     }
 
     if(highlightedLines.size > 0 || nodesAreMarked){
+        console.log("Removing effects")
         changeColors();
         deHighlightLines();
         deHighlightNodes();
@@ -181,8 +184,8 @@ function connectHighlighted(){
     }
 
     if(shortestPathButtonClicked){
-        aStar(ids[0], ids[1]);
-        shortestPathPressed();
+        aStar(ids[0], ids[1]); //finds the shortest path
+        shortestPathPressed(); //unpresses the button
     }else{
         connectNodes(ids[0], ids[1]);   
     }
@@ -381,29 +384,28 @@ function heuristic(node1, node2){
 }  
 
 function aStar(start, goal){
+    console.log("Get shortest path");
     let maxId = Math.max(...nodes.keys()) + 1;
 
-    openSet = new Array();
+    let openSet = new Array();
     openSet.push(start);
 
     path = new Array(maxId);
     path[start] = -1;
 
-    gScore = new Array(maxId);
+    let gScore = new Array(maxId);
     gScore.fill(Number.MAX_SAFE_INTEGER);
     gScore[start] = 0;
     
-    fScore = new Array(maxId);
+    let fScore = new Array(maxId);
     fScore.fill(Number.MAX_SAFE_INTEGER);
     fScore[start] = heuristic(start, goal);
 
     while(openSet.length != 0){
-        openSet.sort(function(a, b){
-            return fScore[a] > fScore[b];
-        });
+        openSet.sort((a, b) => fScore[a] - fScore[b]);
 
         let last = openSet.length - 1;
-        current = openSet[last];  
+        let current = openSet[last];  
         if (current == goal)
             return highlightPath(start, goal, path);
 
@@ -615,6 +617,10 @@ function clearNodes(){
         getAdj();
     }
 
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
+    }
+
     nodeId = 0;
     if(nodes.size <= 0){
         return;
@@ -641,6 +647,10 @@ function deleteClicked(){
 
     if(highlightedLines.size > 0){
         deHighlightLines();
+    }
+
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
     }
 
     const button = document.getElementById("deleteButton");
@@ -676,9 +686,22 @@ function openColorPicker(){
     if(highlightedLines.size > 0){
         deHighlightLines();
     }
+
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
+    }
+
 }
 
 function shortestPathPressed(){
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
     let button = document.getElementById("ShortestPathButton");
     if (typeof button === 'undefined')
         return ;
@@ -696,13 +719,27 @@ function shortestPathPressed(){
 }
 
 function getLongestPath(){
-    if(justClicked){
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
+    }
+
+    if(!effectsRemoved){
         deHighlightNodes();
         deHighlightLines();
-        justClicked = false;
+        effectsRemoved = true;
+        return;
     }
 
     else if(!nodesAreMarked){
+        console.log("Get longest path");
         nodesAreMarked = true;
         justClicked = true;
         let path = longestPath();
@@ -716,38 +753,69 @@ function getLongestPath(){
             let max = Math.max(path[i - 1], path[i]);
             highlightLine(`Line${min}${max}`);
         }
+        effectsRemoved = false;
     }
 }
 
 function getVertexColoring(){
-    if(justClicked){
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
+    }
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+    
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    if(!effectsRemoved){
         changeColors();
-        justClicked = false;
+        effectsRemoved = true;
     }
 
     else if(!nodesAreMarked){
+        console.log("Color vertices");
         nodesAreMarked = true;
-        justClicked = true;
         vertexColoring();
+        effectsRemoved = false;
     }
 }
 
 function getHamiltonianCycle(){
-    if(justClicked){
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
+    }
+
+    if(!effectsRemoved){
         deHighlightLines();
         deHighlightNodes();
-        justClicked = false;
+        effectsRemoved = true;
+        return;
     }
 
     else if(highlightedLines.size == 0){
         nodesAreMarked = true;
-        justClicked = true;
+        console.log("Get hamiltonian cycle");
         hamiltonianCycleHelper();
+        effectsRemoved = false;
     }
 }
 
 function getAdj(){
-    justClicked = true;
+    if(shortestPathButtonClicked){
+        shortestPathPressed();
+    }
+
     const matrix = document.getElementById('Matrix');
 
     if (typeof matrix === 'undefined')
@@ -757,7 +825,6 @@ function getAdj(){
 
     let top = adjButtonOffsets.top + 20;
     let left = adjButtonOffsets.left + 20;
-    console.log(matrixIsDisplayed, justClicked);
 
     if(!matrixIsDisplayed){
         matrix.style.display = "block";
@@ -775,9 +842,8 @@ function getAdj(){
             content += '<br>';
         }
         matrix.innerHTML = content;
-    }
-    
-    else{
+        
+    }else{
         matrix.style.display = "none";
     }
 
