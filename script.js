@@ -140,6 +140,8 @@ function drawNewNode(x, y){
 
 function deHighlightNode(id){
     const node = document.getElementById(id);
+    if (typeof id === 'undefined')
+        return ;
     node.style.border = "none";
     highlightedNodes.delete(id);
 }
@@ -269,6 +271,8 @@ function highlightNodesAndLines(path){
 
 function highlightLine(id){
     let line = document.getElementById(id);
+    if (typeof line === 'undefined')
+        return ;
     if(line){
         line.style.backgroundColor = highlightedAlgColor;
         highlightedLines.add(id);
@@ -278,6 +282,8 @@ function highlightLine(id){
 function deHighlightLines(){
     for(let id of highlightedLines){
         let line = document.getElementById(id);
+        if (typeof line === 'undefined')
+            return ;
         line.style.backgroundColor = defaultLineColor;
     }
     highlightedLines.clear();
@@ -304,6 +310,8 @@ function highlightPath(start, goal, path){
 //Button helper functions
 function deleteNode(id){
     let element = document.getElementById(id);
+    if (typeof element === 'undefined')
+        return ;
     element.remove();
 
     nodes.delete(id);
@@ -533,6 +541,8 @@ function vertexColoring(){
     for(let i = 0; i < maxId; ++i){
         if(nodes.has(i)){
             let node = document.getElementById(i);
+            if (typeof node === 'undefined')
+                return ;
             node.style.backgroundColor = colors.get(result[i]);
         }
     }
@@ -635,6 +645,9 @@ function deleteClicked(){
     const button = document.getElementById("deleteButton");
     const allNodes = document.querySelectorAll('.Node');
 
+    if (typeof button === 'undefined' || typeof allNodes === 'undefined')
+        return ;
+
     deleteIsClicked = !deleteIsClicked;
 
     let color = deleteIsClicked ? deleteButtonColor : defaultButtonColor;
@@ -664,6 +677,8 @@ function openColorPicker(){
 
 function shortestPathPressed(){
     let button = document.getElementById("ShortestPathButton");
+    if (typeof button === 'undefined')
+        return ;
     let color = defaultButtonColor;
 
     if(!shortestPathButtonClicked){
@@ -728,7 +743,11 @@ function getHamiltonianCycle(){
 function getAdj(){
     justClicked = true;
     const matrix = document.getElementById('Matrix');
-    const adjButtonOffsets = document.getElementById('adjButton').getBoundingClientRect();;
+
+    if (typeof matrix === 'undefined')
+        return ;
+
+    const adjButtonOffsets = document.getElementById('adjButton').getBoundingClientRect();
 
     let top = adjButtonOffsets.top + 20;
     let left = adjButtonOffsets.left + 20;
