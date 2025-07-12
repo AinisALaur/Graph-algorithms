@@ -1,22 +1,35 @@
+//Global variables for drawing logic
 let nodes = new Map();
 let highlightedNodes = new Set();
-const colorPicker = document.getElementById('colorPicker');
 let neighbours = new Map();
-let deleteIsClicked = false;
 let nodeId = 0;
+
+//Global variables for algorithms and settings
 let matrixIsDisplayed = false;
+let deleteIsClicked = false;
+const colorPicker = document.getElementById('colorPicker');
 let shortestPathButtonClicked = false;
 let hamiltonianCycleButtonClicked = false;
 let highlightedLines = new Set();
 let justClicked = false;
 let nodesAreMarked = false;
 
-const canvasWidth = 1385;
-const canvasHeight = 400;
+//Global variables for colors
+let defaultNodeColor = "";
+let defaultBorderColor = "";
+let highlightedBorderColor = "#ecc826";
+let highlightedAlgColor = "#5fcf53";
+let defaultButtonColor = "#768d87";
+let deleteButtonColor = "#de1f38";
+let shortestPathButtonColor = "";
+let defaultLineColor = "black";
 
+
+//Everything with coordinates
 function getMousePos(event) {
-    let x = event.clientX;
-    let y = event.clientY;
+    //const zoom = window.devicePixelRatio;
+    let x = event.pageX;// / zoom;
+    let y = event.pageY;// / zoom;
     return [x,y];
 }
 
@@ -55,13 +68,57 @@ function isInBounds(x, y){
     var offsets = document.getElementById('Canvas').getBoundingClientRect();
     var top = offsets.top;
     var left = offsets.left;
+    var right = offsets.right;
+    var bottom = offsets.bottom;
 
-    if(x > left + 5 && x < left + canvasWidth - 54 && y > top - 15 && y < top + canvasHeight - 70){
+    if(x > left + 5 && x < right - 50 && y > top - 15 && y < bottom - 80){
         return true;
     }
     return false;
 }
 
+//highlight node if its clicked on it when trying to remove algorithm effect
+function getCoords(event){
+    if(highlightedLines.size > 0 && justClicked == false || nodesAreMarked && justClicked == false){
+        changeColors();
+        deHighlightLines();
+        for(let id of highlightedNodes){
+            deHighlightNode(id);
+        }
+        nodesAreMarked = false;
+        return;
+    }
+
+    if(justClicked){
+        justClicked = !justClicked;
+    }
+
+    const coords = getMousePos(event);
+    let x = coords[0] - 25;
+    let y = coords[1] - 50;
+
+    if(matrixIsDisplayed){
+        if(isInBounds(x, y)){
+            getAdj();
+        }
+        return;
+    }
+    if(isOverlaping(x,y) == false && isInBounds(x, y) && !deleteIsClicked){
+        nodes.set(nodeId, [x,y]);
+        drawNewNode(x,y);
+    }
+    
+    else{
+        if(isInBounds(x, y)){
+            highlightNode(x,y);
+            if(highlightedNodes.size == 2){
+                connectHighlighted();
+            }
+        }
+    }
+}
+
+//Drawing and highlighting
 function drawNewNode(x, y){
     const newNode = document.createElement("div");
     const newContent = document.createTextNode(nodeId + 1);
@@ -98,10 +155,10 @@ function highlightNode(x, y){
     if (typeof id === 'undefined')
         return ;
 
-    let borderColor = "#ecc826";
+    let borderColor = highlightedBorderColor;
 
     if(shortestPathButtonClicked || justClicked){
-        borderColor = "#5fcf53";
+        borderColor = highlightedAlgColor;
     }
 
     if(highlightedNodes.has(id) == false){
@@ -160,7 +217,7 @@ function connectNodes(id1, id2){
 
     newLine.style.width = length + "px";
     newLine.style.height = "2px";
-    newLine.style.backgroundColor = "black";
+    newLine.style.backgroundColor = defaultLineColor;
     newLine.style.zIndex = "-1";
 
     newLine.style.position = "absolute";
@@ -194,87 +251,6 @@ function connectNodes(id1, id2){
     parent.appendChild(newLine);
 }
 
-//highlight node if its clicked on it when trying to remove algorithm effect
-function getCoords(event){
-    if(highlightedLines.size > 0 && justClicked == false || nodesAreMarked && justClicked == false){
-        changeColors();
-        deHighlightLines();
-        for(let id of highlightedNodes){
-            deHighlightNode(id);
-        }
-        nodesAreMarked = false;
-        return;
-    }
-
-    if(justClicked){
-        justClicked = !justClicked;
-    }
-
-    const coords = getMousePos(event);
-    let x = coords[0] - 25;
-    let y = coords[1] - 50;
-
-    if(matrixIsDisplayed){
-        if(isInBounds(x, y)){
-            getAdj();
-        }
-        return;
-    }
-    if(isOverlaping(x,y) == false && isInBounds(x, y) && !deleteIsClicked){
-        nodes.set(nodeId, [x,y]);
-        drawNewNode(x,y);
-    }
-    
-    else{
-        if(isInBounds(x, y)){
-            highlightNode(x,y);
-            if(highlightedNodes.size == 2){
-                connectHighlighted();
-            }
-        }
-    }
-}
-
-function clearNodes(){
-    if(deleteIsClicked){
-        deleteClicked();
-    }
-
-    if(matrixIsDisplayed){
-        getAdj();
-    }
-
-    nodeId = 0;
-    if(nodes.size <= 0){
-        return;
-    }
-
-    for (const [key, value] of nodes) {
-        deleteNode(key);
-    }
-    
-    nodes.clear();
-    neighbours.clear();
-    highlightedNodes.clear();
-    highlightedLines.clear();
-}
-
-function openColorPicker(){
-    colorPicker.click();
-
-    if(deleteIsClicked){
-        deleteClicked();
-    }
-
-    if(matrixIsDisplayed){
-        getAdj();
-    }
-
-    if(highlightedLines.size > 0){
-        deHighlightLines();
-    }
-}
-
 function changeColors(){
     let newColor = colorPicker.value;
     for (const [key, value] of nodes) {
@@ -285,6 +261,49 @@ function changeColors(){
     button.style.backgroundColor = newColor;
 }
 
+function highlightNodesAndLines(path){
+    highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
+    for(let i = 1; i < path.length; ++i){
+        let coords = nodes.get(path[i]);
+        highlightNode(coords[0], coords[1]);
+
+        let min = Math.min(path[i], path[i - 1]);
+        let max = Math.max(path[i], path[i - 1]);
+        highlightLine(`Line${min}${max}`);
+    }
+    highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
+}
+
+function highlightLine(id){
+    let line = document.getElementById(id);
+    if(line){
+        line.style.backgroundColor = highlightedAlgColor;
+        highlightedLines.add(id);
+    }
+}
+
+function deHighlightLines(){
+    for(let id of highlightedLines){
+        let line = document.getElementById(id);
+        line.style.backgroundColor = defaultLineColor;
+    }
+    highlightedLines.clear();
+}
+
+function highlightPath(start, goal, path){
+    let current = goal;
+    while(current != start){
+        let coords = nodes.get(current);
+        highlightNode(coords[0], coords[1]);
+        let min = Math.min(current, path[current]);
+        let max = Math.max(current, path[current]);
+        highlightLine(`Line${min}${max}`);
+        current = path[current];
+    }
+    highlightNode(nodes.get(start)[0], nodes.get(start)[1]);
+}
+
+//Button helper functions
 function deleteNode(id){
     let element = document.getElementById(id);
     element.remove();
@@ -310,34 +329,6 @@ function deleteNode(id){
     }   
 
     neighbours.delete(id);
-}
-
-function deleteClicked(){
-
-    for(let id of highlightedNodes){
-        deHighlightNode(id);
-    }
-
-    if(matrixIsDisplayed){
-        getAdj();
-    }
-
-    if(highlightedLines.size > 0){
-        deHighlightLines();
-    }
-
-    const button = document.getElementById("deleteButton");
-    const allNodes = document.querySelectorAll('.Node');
-
-    deleteIsClicked = !deleteIsClicked;
-
-    let color = deleteIsClicked ? "#de1f38" : "#768d87";
-
-    allNodes.forEach(node => {
-        node.classList.toggle('delete-hover', deleteIsClicked);
-    });
-
-    button.style.backgroundColor = color;
 }
 
 function constructMatrix(){
@@ -375,70 +366,7 @@ function constructMatrix(){
     return matrix;
 }
 
-function getAdj(){
-    const matrix = document.getElementById('Matrix');
-    const adjButtonOffsets = document.getElementById('adjButton').getBoundingClientRect();;
-
-    let top = adjButtonOffsets.top + 20;
-    let left = adjButtonOffsets.left + 20;
-
-    if(highlightedLines.size > 0){
-        deHighlightLines();
-    }
-
-    if(!matrixIsDisplayed){
-        matrix.style.display = "block";
-
-        matrix.style.top = top + 'px';
-        matrix.style.left = left + 'px';
-
-        let adjMatrix = constructMatrix();
-        let content = "";
-
-        for(let row of adjMatrix){
-            for(let element of row){
-                content += element + ', ';
-            }
-            content += '<br>';
-        }
-        matrix.innerHTML = content;
-
-    }else{
-        matrix.style.display = "none";
-    }
-
-    matrixIsDisplayed = !matrixIsDisplayed;
-}
-
-function highlightLine(id){
-    let line = document.getElementById(id);
-    if(line){
-        line.style.backgroundColor = "#5fcf53";
-        highlightedLines.add(id);
-    }
-}
-
-function deHighlightLines(){
-    for(let id of highlightedLines){
-        let line = document.getElementById(id);
-        line.style.backgroundColor = "black";
-    }
-    highlightedLines.clear();
-}
-
-function reconstructPath(start, goal, path){
-    let current = goal;
-    while(current != start){
-        let coords = nodes.get(current);
-        highlightNode(coords[0], coords[1]);
-        let min = Math.min(current, path[current]);
-        let max = Math.max(current, path[current]);
-        highlightLine(`Line${min}${max}`);
-        current = path[current];
-    }
-    highlightNode(nodes.get(start)[0], nodes.get(start)[1]);
-}
-
+//algorithms' helper functions
 function heuristic(node1, node2){
     let coords1 = nodes.get(node1);
     let coords2 = nodes.get(node2);
@@ -470,7 +398,7 @@ function aStar(start, goal){
         let last = openSet.length - 1;
         current = openSet[last];  
         if (current == goal)
-            return reconstructPath(start, goal, path);
+            return highlightPath(start, goal, path);
 
         openSet.splice(last, 1);    
 
@@ -493,19 +421,6 @@ function aStar(start, goal){
     }   
 
     return -1;
-}
-
-function highlightNodesAndLines(path){
-    highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
-    for(let i = 1; i < path.length; ++i){
-        let coords = nodes.get(path[i]);
-        highlightNode(coords[0], coords[1]);
-
-        let min = Math.min(path[i], path[i - 1]);
-        let max = Math.max(path[i], path[i - 1]);
-        highlightLine(`Line${min}${max}`);
-    }
-    highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
 }
 
 function hamiltonianCycleHelper(){
@@ -559,25 +474,6 @@ function hamiltonianCycle(start, current, path, visited){
     }
 
     return false;
-}
-
-function getShortestPath(){
-    let button = document.getElementById("ShortestPathButton");
-    let color = "#768d87";
-
-    if(!shortestPathButtonClicked){
-        color = "#5fcf53";
-    }
-
-    button.style.backgroundColor = color;
-    shortestPathButtonClicked = !shortestPathButtonClicked;
-}
-
-function getHamiltonianCycle(){
-    if(!justClicked && highlightedLines.size == 0){
-        justClicked = true;
-        hamiltonianCycleHelper();
-    }
 }
 
 function generateRandomColor(){
@@ -644,14 +540,6 @@ function vertexColoring(){
     }
 }
 
-function getVertexColoring(){
-    if(!nodesAreMarked){
-        nodesAreMarked = true;
-        justClicked = true;
-        vertexColoring();
-    }
-}
-
 function dfs(node, visited, path){
     visited.add(node);
 
@@ -708,11 +596,94 @@ function longestPath(){
     return longestPath;
 }
 
+//Button functions
+function clearNodes(){
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    nodeId = 0;
+    if(nodes.size <= 0){
+        return;
+    }
+
+    for (const [key, value] of nodes) {
+        deleteNode(key);
+    }
+    
+    nodes.clear();
+    neighbours.clear();
+    highlightedNodes.clear();
+    highlightedLines.clear();
+}
+
+function deleteClicked(){
+    for(let id of highlightedNodes){
+        deHighlightNode(id);
+    }
+
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    if(highlightedLines.size > 0){
+        deHighlightLines();
+    }
+
+    const button = document.getElementById("deleteButton");
+    const allNodes = document.querySelectorAll('.Node');
+
+    deleteIsClicked = !deleteIsClicked;
+
+    let color = deleteIsClicked ? deleteButtonColor : defaultButtonColor;
+
+    allNodes.forEach(node => {
+        node.classList.toggle('delete-hover', deleteIsClicked);
+    });
+
+    button.style.backgroundColor = color;
+}
+
+function openColorPicker(){
+    colorPicker.click();
+
+    if(deleteIsClicked){
+        deleteClicked();
+    }
+
+    if(matrixIsDisplayed){
+        getAdj();
+    }
+
+    if(highlightedLines.size > 0){
+        deHighlightLines();
+    }
+}
+
+function getShortestPath(){
+    let button = document.getElementById("ShortestPathButton");
+    let color = "#768d87";
+
+    if(!shortestPathButtonClicked){
+        color = "#5fcf53";
+    }
+
+    button.style.backgroundColor = color;
+    shortestPathButtonClicked = !shortestPathButtonClicked;
+}
+
 function getLongestPath(){
     if(!nodesAreMarked){
         nodesAreMarked = true;
         justClicked = true;
         let path = longestPath();
+        if(path.length == 0)
+            return;
+
         highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
         for(let i = 1; i < path.length; ++i){
             let coords = nodes.get(path[i]);
@@ -724,6 +695,56 @@ function getLongestPath(){
     }
 }
 
+function getVertexColoring(){
+    if(!nodesAreMarked){
+        nodesAreMarked = true;
+        justClicked = true;
+        vertexColoring();
+    }
+}
 
+function getHamiltonianCycle(){
+    if(!justClicked && highlightedLines.size == 0){
+        justClicked = true;
+        hamiltonianCycleHelper();
+    }
+}
+
+function getAdj(){
+    const matrix = document.getElementById('Matrix');
+    const adjButtonOffsets = document.getElementById('adjButton').getBoundingClientRect();;
+
+    let top = adjButtonOffsets.top + 20;
+    let left = adjButtonOffsets.left + 20;
+
+    if(highlightedLines.size > 0){
+        deHighlightLines();
+    }
+
+    if(!matrixIsDisplayed){
+        matrix.style.display = "block";
+
+        matrix.style.top = top + 'px';
+        matrix.style.left = left + 'px';
+
+        let adjMatrix = constructMatrix();
+        let content = "";
+
+        for(let row of adjMatrix){
+            for(let element of row){
+                content += element + ', ';
+            }
+            content += '<br>';
+        }
+        matrix.innerHTML = content;
+
+    }else{
+        matrix.style.display = "none";
+    }
+
+    matrixIsDisplayed = !matrixIsDisplayed;
+}
+
+//Event listeners
 colorPicker.addEventListener("input", changeColors)
-document.addEventListener("click", getCoords);
+document.addEventListener("click", getCoords, true);
