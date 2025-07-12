@@ -46,9 +46,11 @@
     font-size: 20px;
 
     transition: 0.1s;
+    user-select: none;
 }
 
 .Node:hover{
+    scale: 1.2;
     border: 3px solid #ecc826 !important;
 }
 
