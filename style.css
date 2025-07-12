@@ -17,6 +17,17 @@
     width: 90%;
 
     border-style: solid;
+
+    animation: 0.5s slide-in-left ease;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 #Options{
@@ -24,6 +35,17 @@
     width: 90%;
 
     border-style: solid;
+
+    animation: 0.5s slide-in-top ease;
+}
+
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .Node{
