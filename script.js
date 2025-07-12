@@ -9,7 +9,7 @@ let shortestPathButtonClicked = false;
 let hamiltonianCycleButtonClicked = false;
 let highlightedLines = new Set();
 let justClicked = false;
-let nodesAreColored = false;
+let nodesAreMarked = false;
 
 const canvasWidth = 1385;
 const canvasHeight = 400;
@@ -94,6 +94,7 @@ function deHighlightNode(id){
 
 function highlightNode(x, y){   
     let id = getNodeId(x, y);
+    console.log("highlighting node: ", id);
     if (typeof id === 'undefined')
         return ;
 
@@ -195,13 +196,13 @@ function connectNodes(id1, id2){
 
 //highlight node if its clicked on it when trying to remove algorithm effect
 function getCoords(event){
-    if(highlightedLines.size > 0 && justClicked == false || nodesAreColored && justClicked == false){
+    if(highlightedLines.size > 0 && justClicked == false || nodesAreMarked && justClicked == false){
         changeColors();
         deHighlightLines();
         for(let id of highlightedNodes){
             deHighlightNode(id);
         }
-        nodesAreColored = false;
+        nodesAreMarked = false;
         return;
     }
 
@@ -589,6 +590,9 @@ function generateRandomColor(){
 }
 
 function vertexColoring(){
+    if(nodes.size < 1)
+        return;
+
     let maxId = Math.max(...nodes.keys()) + 1;
     let result = new Array(maxId);
     result.fill(-1);
@@ -641,12 +645,85 @@ function vertexColoring(){
 }
 
 function getVertexColoring(){
-    if(!nodesAreColored){
-        nodesAreColored = true;
+    if(!nodesAreMarked){
+        nodesAreMarked = true;
         justClicked = true;
         vertexColoring();
     }
 }
+
+function dfs(node, visited, path){
+    visited.add(node);
+
+    if(neighbours.has(node)){
+        for(let u of neighbours.get(node)){
+            if(visited.has(u) == false){
+                path[u] = node;
+                dfs(u, visited, path);
+            }
+        }
+    }
+}
+
+function findLongestPath(start, path){
+    let longestPath = new Array();
+
+    for(let goal = 0; goal < path.length; ++goal){
+        let longestSubPath = new Array();
+        current = goal;
+
+        if(current == start || path[current] == -1)
+            continue;
+
+        while(current != start){
+            longestSubPath.push(current);
+            current = path[current];
+        }longestSubPath.push(start);
+
+        if(longestSubPath.length > longestPath.length){
+            longestPath = longestSubPath;
+        }
+    }
+
+    return longestPath;
+}
+
+function longestPath(){
+    let maxId = Math.max(...nodes.keys());
+    let longestPath = new Array();
+
+    for(let i = 0; i < maxId + 1; ++i){
+        let visited = new Set();
+        let path = new Array(maxId + 1);
+        path.fill(-1);
+        if(nodes.has(i)){
+            dfs(i, visited, path);
+            let newPath = findLongestPath(i, path);
+
+            if(newPath.length > longestPath.length){
+                longestPath = newPath;
+            }
+        }
+    }
+    return longestPath;
+}
+
+function getLongestPath(){
+    if(!nodesAreMarked){
+        nodesAreMarked = true;
+        justClicked = true;
+        let path = longestPath();
+        highlightNode(nodes.get(path[0])[0], nodes.get(path[0])[1]);
+        for(let i = 1; i < path.length; ++i){
+            let coords = nodes.get(path[i]);
+            highlightNode(coords[0], coords[1]);
+            let min = Math.min(path[i - 1], path[i]);
+            let max = Math.max(path[i - 1], path[i]);
+            highlightLine(`Line${min}${max}`);
+        }
+    }
+}
+
 
 colorPicker.addEventListener("input", changeColors)
 document.addEventListener("click", getCoords);
