@@ -9,6 +9,7 @@
     --nodeHoverColor: #ecc826;
     --headerTextColor: #636363;
     --headerFont: "JetBrains Mono";
+    --nodeRadius: 50px;
 }
 
 #Main{
@@ -63,8 +64,8 @@
 }
 
 .Node{
-    height: 50px;
-    width: 50px;
+    height: var(--nodeRadius);
+    width: var(--nodeRadius);
 
     color: var(--nodeTextColor);
     background-color: var(--nodeBackgroundColor);
@@ -76,8 +77,8 @@
     border: 3px solid transparent;
 
     border-radius: 50%;
-    box-shadow:  8px 8px 16px #bababa,
-    -8px -8px 16px #ffffff;
+
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 
     font-size: 20px;
 
