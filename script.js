@@ -71,7 +71,7 @@ function isInBounds(x, y){
     var right = offsets.right;
     var bottom = offsets.bottom;
 
-    if(x > left + 5 && x < right - 50 && y > top - 15 && y < bottom - 80){
+    if(x > left - 10 && x < right - 73 && y > top - 15 && y < bottom - 80){
         return true;
     }
     return false;
@@ -100,16 +100,6 @@ function useCoords(event){
         nodes.set(nodeId, [x,y]);
         drawNewNode(x,y);
     }
-    
-    else{
-        if(isInBounds(x, y)){
-            let id = getNodeId(x, y);
-            highlightNode(id);
-            if(highlightedNodes.size == 2){
-                connectHighlighted();
-            }
-        }
-    }
 }
 
 //Drawing and highlighting
@@ -132,6 +122,8 @@ function drawNewNode(x, y){
     newNode.style.top = y + 'px';
     newNode.style.backgroundColor = colorPicker.value;
 
+    newNode.onclick = () => highlightNode(newId);
+
     const parent = document.getElementById("Canvas");
     parent.appendChild(newNode);
 
@@ -151,6 +143,7 @@ function deHighlightNode(id){
 }
 
 function highlightNode(id){
+    console.log("Highlighting node", id);
     if (typeof id === 'undefined')
         return ;
 
@@ -171,6 +164,11 @@ function highlightNode(id){
         }
     }else{
         deHighlightNode(id);
+    }
+
+    if(highlightedNodes.size == 2){
+        connectHighlighted();
+        return;
     }
 }
 
@@ -449,6 +447,7 @@ function hamiltonianCycleHelper(){
     let isCycle = hamiltonianCycle(start, start, path, visited);
 
     if(isCycle){
+        effectsRemoved = false;
         path.push(path[0]);
         highlightNodesAndLines(path);
     }
@@ -807,7 +806,6 @@ function getHamiltonianCycle(){
         nodesAreMarked = true;
         console.log("Get hamiltonian cycle");
         hamiltonianCycleHelper();
-        effectsRemoved = false;
     }
 }
 
