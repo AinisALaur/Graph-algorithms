@@ -1,6 +1,19 @@
+:root{
+    --mainHeight: 650px;
+    --mainWidth: 1500px;
+    --canvasHeight: 400px;
+    --canvasWidth: 1400px;
+    --optionsHeight: 230px;
+    --nodeTextColor: white;
+    --nodeBackgroundColor: #3136bf;;
+    --nodeHoverColor: #ecc826;
+    --headerTextColor: #636363;
+    --headerFont: "JetBrains Mono";
+}
+
 #Main{
-    height: 650px;
-    width: 100%;
+    height: var(--mainHeight);
+    width: var(--mainWidth);
     
     position: absolute;
     left: 50%;  
@@ -13,8 +26,8 @@
 }
 
 #Canvas{
-    height: 400px;
-    width: 90%;
+    height: var(--canvasHeight);
+    width: var(--canvasWidth);
 
     border-style: solid;
 
@@ -31,8 +44,8 @@
 }
 
 #Options{
-    height: 230px;
-    width: 90%;
+    height: var(--optionsHeight);
+    width: var(--canvasWidth);
 
     border-style: solid;
 
@@ -53,8 +66,8 @@
     height: 50px;
     width: 50px;
 
-    color: white;
-    background-color: #3136bf;
+    color: var(--nodeTextColor);
+    background-color: var(--nodeBackgroundColor);
 
     display: flex;
     align-items: center;
@@ -74,7 +87,7 @@
 
 .Node:hover{
     scale: 1.2;
-    border: 3px solid #ecc826 !important;
+    border: 3px solid var(--nodeHoverColor) !important;
 }
 
 #Algorithms{
@@ -100,9 +113,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: "JetBrains Mono",monospace;
+    font-family: var(--headerFont), monospace;
     font-optical-sizing: auto;
-    color: rgb(99, 99, 99);   
+    color: var(--headerTextColor);
     font-size: 42px;
     text-shadow: 0px 4px 11px rgba(0,0,0,0.6);
     border-bottom: 3px black solid;
