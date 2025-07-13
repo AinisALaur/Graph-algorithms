@@ -71,7 +71,7 @@ function isInBounds(x, y){
     var right = offsets.right;
     var bottom = offsets.bottom;
 
-    if(x > left - 10 && x < right - 73 && y > top - 15 && y < bottom - 80){
+    if(x > left + 5 && x < right - 50 && y > top - 15 && y < bottom - 80){
         return true;
     }
     return false;
@@ -122,7 +122,12 @@ function drawNewNode(x, y){
     newNode.style.top = y + 'px';
     newNode.style.backgroundColor = colorPicker.value;
 
-    newNode.onclick = () => highlightNode(newId);
+    newNode.onclick = () => {
+        highlightNode(newId);
+        if (highlightedNodes.size == 2) {
+            connectHighlighted();
+        }
+    };
 
     const parent = document.getElementById("Canvas");
     parent.appendChild(newNode);
@@ -143,7 +148,6 @@ function deHighlightNode(id){
 }
 
 function highlightNode(id){
-    console.log("Highlighting node", id);
     if (typeof id === 'undefined')
         return ;
 
@@ -164,11 +168,6 @@ function highlightNode(id){
         }
     }else{
         deHighlightNode(id);
-    }
-
-    if(highlightedNodes.size == 2){
-        connectHighlighted();
-        return;
     }
 }
 
