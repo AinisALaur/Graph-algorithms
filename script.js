@@ -83,12 +83,12 @@ function useCoords(event){
         return;
     }
 
-    if(highlightedLines.size > 0 || nodesAreMarked){
-        console.log("Removing effects")
+    if(highlightedLines.size > 0 || nodesAreMarked || effectsRemoved == false){
         changeColors();
         deHighlightLines();
         deHighlightNodes();
         nodesAreMarked = false;
+        effectsRemoved = true;
         return;
     }
 
@@ -381,7 +381,6 @@ function heuristic(node1, node2){
 }  
 
 function aStar(start, goal){
-    console.log("Get shortest path");
     let maxId = Math.max(...nodes.keys()) + 1;
 
     let openSet = new Array();
@@ -493,9 +492,6 @@ function generateRandomColor(){
 }
 
 function vertexColoring(){
-    if(nodes.size < 1)
-        return;
-
     let maxId = Math.max(...nodes.keys()) + 1;
     let result = new Array(maxId);
     result.fill(-1);
@@ -586,6 +582,9 @@ function findLongestPath(start, path){
 }
 
 function longestPath(){
+    if(nodes.size < 1)
+        return;
+
     let maxId = Math.max(...nodes.keys());
     let longestPath = new Array();
 
@@ -706,6 +705,9 @@ function shortestPathPressed(){
     let color = defaultButtonColor;
     let textColor = defaultTextColor;
 
+    if(nodes.size < 1)
+        return;
+
     if(!shortestPathButtonClicked){
         color = shortestPathButtonColor;
         textColor = defaultButtonColor;
@@ -729,15 +731,10 @@ function getLongestPath(){
         shortestPathPressed();
     }
 
-    if(!effectsRemoved){
-        deHighlightNodes();
-        deHighlightLines();
-        effectsRemoved = true;
+    if(nodes.size < 1)
         return;
-    }
 
-    else if(!nodesAreMarked){
-        console.log("Get longest path");
+    if(!nodesAreMarked){
         nodesAreMarked = true;
         justClicked = true;
         let path = longestPath();
@@ -755,7 +752,7 @@ function getLongestPath(){
     }
 }
 
-function getVertexColoring(){
+function getVertexColoring(){    
     if(shortestPathButtonClicked){
         shortestPathPressed();
     }
@@ -768,13 +765,10 @@ function getVertexColoring(){
         getAdj();
     }
 
-    if(!effectsRemoved){
-        changeColors();
-        effectsRemoved = true;
-    }
+    if(nodes.size < 1)
+        return;
 
-    else if(!nodesAreMarked){
-        console.log("Color vertices");
+    if(!nodesAreMarked){
         nodesAreMarked = true;
         vertexColoring();
         effectsRemoved = false;
@@ -794,16 +788,11 @@ function getHamiltonianCycle(){
         shortestPathPressed();
     }
 
-    if(!effectsRemoved){
-        deHighlightLines();
-        deHighlightNodes();
-        effectsRemoved = true;
+    if(nodes.size < 1)
         return;
-    }
 
-    else if(highlightedLines.size == 0){
+    if(highlightedLines.size == 0){
         nodesAreMarked = true;
-        console.log("Get hamiltonian cycle");
         hamiltonianCycleHelper();
     }
 }
