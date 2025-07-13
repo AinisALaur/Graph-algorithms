@@ -381,6 +381,9 @@ function heuristic(node1, node2){
 }  
 
 function aStar(start, goal){
+    if(nodes.size < 1)
+        return;
+
     let maxId = Math.max(...nodes.keys()) + 1;
 
     let openSet = new Array();
@@ -704,9 +707,6 @@ function shortestPathPressed(){
         return ;
     let color = defaultButtonColor;
     let textColor = defaultTextColor;
-
-    if(nodes.size < 1)
-        return;
 
     if(!shortestPathButtonClicked){
         color = shortestPathButtonColor;
