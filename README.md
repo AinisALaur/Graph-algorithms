@@ -1,5 +1,7 @@
 # Graph algorithms
 
+![Program Screenshot](Graph.png)
+
 ## Table of Contents
 - [About](#about)
 - [Installation](#installation)
