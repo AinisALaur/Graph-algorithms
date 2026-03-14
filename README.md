@@ -18,6 +18,10 @@ Download all files and run the index.html file
 
 ## Usage
 ### Options and basic information
+
+### ⚠️ NOTE
+The program does not work for any aspect ratio. You may need to zoom in or out for it to work correctly.
+
 To initialize a new node, click anywhere on the canvas (at first, an empty rectangle). All nodes are labeled with their instance number. To connect two nodes, click on both of them - this will highlight the first one, and once the second one is "highlighted", a line joining them will appear. To delete a node, click the "Delete node" button. Once it turns red, click all the nodes that need to be deleted. Once finished, click the button again to disable "delete" mode. If a fresh canvas is needed, the "Clear canvas" button does just that. The color of the nodes can be changed momentarily with the color palette disguised as a button "Nodecolor". The "Export adj. matrix" button shows the adjacency matrix for the displayed graph.
 
 ### Algorithms
