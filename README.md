@@ -14,7 +14,12 @@
 This is a project that allows the user to visualize various graphs and run 4 different algorithms: find the shortest path between two selected nodes, find the overall longest path, determine whether a Hamiltonian cycle is present - if so, visualize the nodes that make it exist, and an algorithm that finds the chromatic number for a graph and colors the nodes.
 
 ## Installation
-Download all files and run the index.html file
+Download
+```bash
+# clone the repo
+git clone https://github.com/AinisALaur/Graph-algorithms.git
+```
+Run the index.html file
 
 ## Usage
 ### Options and basic information
